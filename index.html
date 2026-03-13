@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Gewicht Tracker</title>
+
 <style>
 body{
 font-family:Arial;
@@ -23,9 +24,14 @@ padding:10px 20px;
 margin-top:10px;
 }
 
+.list{
+margin-top:30px;
+}
+
 .result{
 margin-top:20px;
 font-size:22px;
+white-space:pre-line;
 }
 </style>
 </head>
@@ -39,6 +45,11 @@ font-size:22px;
 <button onclick="saveWeight()">Speichern</button>
 
 <div class="result" id="output"></div>
+
+<div class="list">
+<h2>Einträge</h2>
+<div id="entries"></div>
+</div>
 
 <script>
 
@@ -54,7 +65,10 @@ function saveWeight(){
 
 let w = parseFloat(document.getElementById("weight").value)
 
-if(!w) return
+if(!w){
+alert("Gewicht eingeben")
+return
+}
 
 let data = loadData()
 
@@ -64,7 +78,9 @@ data.push({date:today,weight:w})
 
 saveData(data)
 
-calculate()
+document.getElementById("weight").value=""
+
+render()
 
 }
 
@@ -72,12 +88,20 @@ function average(arr){
 return arr.reduce((a,b)=>a+b)/arr.length
 }
 
-function calculate(){
+function render(){
 
 let data = loadData()
 
+let entriesHTML=""
+
+data.slice().reverse().forEach(e=>{
+entriesHTML += e.date+" - "+e.weight+" kg<br>"
+})
+
+document.getElementById("entries").innerHTML=entriesHTML
+
 if(data.length < 7){
-document.getElementById("output").innerText="Noch nicht genug Daten"
+document.getElementById("output").innerText="Noch nicht genug Daten für Wochendurchschnitt"
 return
 }
 
@@ -96,7 +120,7 @@ let rate = (week2-week1)/week1*100
 text += "\nZunahme: "+rate.toFixed(3)+" %"
 
 if(rate >=0.3 && rate <=0.5){
-text += "\nPerfekte Rate"
+text += "\nPerfekte Zunahme"
 }else if(rate <0.3){
 text += "\nZu langsam"
 }else{
@@ -109,7 +133,7 @@ document.getElementById("output").innerText=text
 
 }
 
-calculate()
+render()
 
 </script>
 
