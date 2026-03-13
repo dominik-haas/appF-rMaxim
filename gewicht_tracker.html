@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Gewicht Tracker</title>
+<style>
+body{
+font-family:Arial;
+text-align:center;
+padding:40px;
+background:#111;
+color:white;
+}
+
+input{
+font-size:20px;
+padding:10px;
+}
+
+button{
+font-size:20px;
+padding:10px 20px;
+margin-top:10px;
+}
+
+.result{
+margin-top:20px;
+font-size:22px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Gewicht Tracker</h1>
+
+<input id="weight" type="number" step="0.1" placeholder="Gewicht (kg)">
+<br>
+<button onclick="saveWeight()">Speichern</button>
+
+<div class="result" id="output"></div>
+
+<script>
+
+function loadData(){
+return JSON.parse(localStorage.getItem("weights") || "[]")
+}
+
+function saveData(data){
+localStorage.setItem("weights", JSON.stringify(data))
+}
+
+function saveWeight(){
+
+let w = parseFloat(document.getElementById("weight").value)
+
+if(!w) return
+
+let data = loadData()
+
+let today = new Date().toISOString().slice(0,10)
+
+data.push({date:today,weight:w})
+
+saveData(data)
+
+calculate()
+
+}
+
+function average(arr){
+return arr.reduce((a,b)=>a+b)/arr.length
+}
+
+function calculate(){
+
+let data = loadData()
+
+if(data.length < 7){
+document.getElementById("output").innerText="Noch nicht genug Daten"
+return
+}
+
+let last7 = data.slice(-7).map(x=>x.weight)
+let avg = average(last7)
+
+let text = "Wochendurchschnitt: "+avg.toFixed(2)+" kg"
+
+if(data.length >= 14){
+
+let week1 = average(data.slice(-14,-7).map(x=>x.weight))
+let week2 = avg
+
+let rate = (week2-week1)/week1*100
+
+text += "\nZunahme: "+rate.toFixed(3)+" %"
+
+if(rate >=0.3 && rate <=0.5){
+text += "\nPerfekte Rate"
+}else if(rate <0.3){
+text += "\nZu langsam"
+}else{
+text += "\nZu schnell"
+}
+
+}
+
+document.getElementById("output").innerText=text
+
+}
+
+calculate()
+
+</script>
+
+</body>
+</html>
